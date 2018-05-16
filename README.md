@@ -5,6 +5,11 @@ Random Forest
 - Use CART (Classfication and regression tree) as a base tree
 - Using data set: the famous [Iris data set](http://archive.ics.uci.edu/ml/datasets/Iris) on UCI Machine Learning Repository. 
 
+## Usage
+- make clean
+- make
+- ./run.sh
+
 ## Experiments on performance 
 - Relative sizes of the training and validation subsets.
 - Number of trees in the forest.
