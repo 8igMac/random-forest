@@ -6,9 +6,11 @@ Random Forest
 - Using data set: the famous [Iris data set](http://archive.ics.uci.edu/ml/datasets/Iris) on UCI Machine Learning Repository. 
 
 ## Usage
-- make clean
+To run the program
 - make
 - ./run.sh
+To clean the project
+- make clean
 
 ## Experiments on performance 
 - Relative sizes of the training and validation subsets.
