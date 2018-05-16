@@ -1,1 +1,7 @@
 # This is a gitignore file, add file name below to exclude from git
+
+# ignore any object file
+build/*
+
+# ignore any executable
+bin/*
