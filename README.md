@@ -9,8 +9,7 @@ Random Forest
 To run the program
 - make
 - ./run.sh
-To clean the project
-- make clean
+- make clean (To clean the project)
 
 ## Experiments on performance 
 - Relative sizes of the training and validation subsets.
