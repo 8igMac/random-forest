@@ -1,14 +1,19 @@
 #include <iostream>
+#include <vector>
+
 #include "../include/decision_tree.h"
 using namespace std;
 
 int main(int argc, char** argv)
 {
-	if (argc <= 1)
-		cout << "usage: ./main data_set" << endl;
+	irisDataSet myDataSet;
 
-	cout << argv[1] << endl;
-	dummy();
+	if (argc != 2)
+		cout << "usage: ./main data-set" << endl;
+
+	myDataSet.get_data_from_file(argv[1]);
+
+
 
 
 	return 0;
