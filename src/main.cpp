@@ -6,15 +6,27 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	irisDataSet myDataSet;
+	irisDataSet dataSet;
+	vector<iris> irisTrainSet, irisValiSet;
+	random_forest<iris> irisForest;
+	analyser<iris> irisAnalyser;
 
 	if (argc != 2)
 		cout << "usage: ./main data-set" << endl;
 
-	myDataSet.get_data_from_file(argv[1]);
+	// extract data from file
+	dataSet.get_data_from_file(argv[1]);
 
+	// split data into training subset and
+	// validation subset
+	dataSet.split_data(irisTrainSet, irisValiSet);
 
-
-
+	// build forest
+	irisForest.build_forest(irisTrainSet);
+	
+	// validate and analyse accuracy
+	irisAnalyser.analyse(irisForest, irisValiSet);
+	irisAnalyser.print_result();
+	
 	return 0;
 }
