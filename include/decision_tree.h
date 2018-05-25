@@ -7,12 +7,16 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <utility>
+#include <unordered_map>
 
 using namespace std;
 
 #define TRAINSIZE 100
 #define VALIDSIZE 50
 
+// Last is a dummy element
+enum irisClass { setosa, versicolor, virginica, Last };
 
 struct iris
 {
@@ -27,7 +31,7 @@ struct iris
 	// petal width in cm
 	float pw;
 	// class
-	string cls;
+	int cls;
 };
 
 class irisDataSet
@@ -68,18 +72,31 @@ class random_forest
 {
 	public:
 		void build_forest(vector<T> trainSet);
+		int classify(T valiInst);
 
 	private:
 		vector<decision_tree<T>> treeSet;
 		vector<T> trainSet;
 };
 
-template <class T>
-class analyser
+class irisAnalyser
 {
 	public:
-		void analyse(random_forest<T> forest, vector<T> valiSet);
+		irisAnalyser();
+		void analyse(random_forest<iris> forest, vector<iris> valiSet);
 		void print_result();
+	
+	private:
+		// use class of iris as key
+		// key: sts, vsclr, vgnc
+		unordered_map<int, int> true_pos;
+		unordered_map<int, int> false_pos;
+		unordered_map<int, int> false_neg;
+
+		unordered_map<int, float> precision;
+		unordered_map<int, float> recall;
+
+		void calculate_result();
 };
 
 #endif

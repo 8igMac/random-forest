@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	irisDataSet dataSet;
 	vector<iris> irisTrainSet, irisValiSet;
 	random_forest<iris> irisForest;
-	analyser<iris> irisAnalyser;
+	irisAnalyser irsAlyzr;
 
 	if (argc != 2)
 		cout << "usage: ./main data-set" << endl;
@@ -25,8 +25,8 @@ int main(int argc, char** argv)
 	irisForest.build_forest(irisTrainSet);
 	
 	// validate and analyse accuracy
-	irisAnalyser.analyse(irisForest, irisValiSet);
-	irisAnalyser.print_result();
+	irsAlyzr.analyse(irisForest, irisValiSet);
+	irsAlyzr.print_result();
 	
 	return 0;
 }
