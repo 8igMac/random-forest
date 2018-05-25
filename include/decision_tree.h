@@ -9,11 +9,15 @@
 #include <iomanip>
 #include <utility>
 #include <unordered_map>
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
 
 #define TRAINSIZE 100
 #define VALIDSIZE 50
+
+#define NUMTREE 5
 
 // Last is a dummy element
 enum irisClass { setosa, versicolor, virginica, Last };
@@ -56,9 +60,10 @@ template <class T>
 class decision_tree
 {
 	public:
-		decision_tree(vector<iris> trainSet);
+		decision_tree();
 		~decision_tree();
-		void build_tree();
+		void build_tree(vector<iris> trainSet);
+		int classify(T valiInst);
 
 	private:
 		vector<T> trainSet;
@@ -71,6 +76,7 @@ template <class T>
 class random_forest
 {
 	public:
+		random_forest();
 		void build_forest(vector<T> trainSet);
 		int classify(T valiInst);
 

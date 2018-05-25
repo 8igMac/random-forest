@@ -1,5 +1,6 @@
 #include "../include/decision_tree.h"
 
+
 // -----------------------
 // 		class irisDataSet
 // -----------------------
@@ -64,9 +65,52 @@ void irisDataSet::print_dataSet()
 // 	class decision_tree
 // -----------------------
 
+template <class T>
+decision_tree<T>::decision_tree()
+	: root(NULL) {};
+
 // -----------------------
 // 	class random_forest
 // -----------------------
+
+template <class T>
+random_forest<T>::random_forest()
+	: treeSet(NUMTREE) {}
+
+template <class T>
+void random_forest<T>::build_forest(vector<T> trainSet)
+{
+
+}
+
+template <class T>
+int random_forest<T>::classify(T valiInst)
+{
+	// random number seed
+	srand(time(NULL));
+
+	// vote
+	vector<int> vote(3,0);
+	for (auto tree: treeSet)
+		vote[tree.classify(valiInst)]++;
+
+	// reach consensus among trees
+	int majorVote=0;
+	for (int i=1; i<vote.size(); i++)
+	{
+		if (vote[majorVote] < vote[i])
+			majorVote = i;
+		else if (vote[majorVote] == vote[i])
+		{
+			// break tie by select random
+			if (rand()%2 == 0)
+				majorVote = i;
+		}
+	}
+
+	return majorVote;
+}
+
 
 // -----------------------
 // 		 class irisAnalyser
