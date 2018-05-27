@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 	irisDataSet dataSet;
 	vector<iris> irisTrainSet(TRAINSIZE), irisValiSet(VALIDSIZE);
 	decision_tree<iris> tree;
+	random_forest<iris> forest;
 
 	if (argc != 2)
 		cout << "usage: ./main data-set" << endl;
@@ -22,7 +23,10 @@ int main(int argc, char** argv)
 	// validation subset
 	dataSet.split_data(irisTrainSet, irisValiSet);
 
-	tree.build_tree(irisTrainSet);
+	forest.build_forest(irisTrainSet);
+
+	for (auto sample: irisValiSet)
+		cout << "actual: " << sample.cls << "pridict: " << forest.classify(sample) << endl;
 
 
 	return 0;

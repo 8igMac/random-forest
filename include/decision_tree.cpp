@@ -16,7 +16,7 @@ using namespace std;
 // parameter for tuing
 #define TRAINSIZE 100
 #define VALIDSIZE 50
-#define NUMTREE 5
+#define NUMTREE 8
 #define ATTRBAGGING 2
 #define MAXDEPTH 10
 #define MINSAMPLE 1
@@ -140,16 +140,16 @@ class irisAnalyser
 // on the interval [begin, end]
 vector<int> rdmSelectSet(int begin, int end, int n)
 {
+	int size = end-begin+1;
 	// implement Kruth shuffle algorithm
-	vector<int> list(n);
-	srand(time(NULL));
+	vector<int> list(size);
 
 	// init list 
-	for (int i=0; i<n; i++)
-		list[i] = begin+i;
+	for (int i=begin; i<=end; i++)
+		list[i] = i;
 
 	// shuffle
-	for (int i=n-1; i>=0; i--)
+	for (int i=size-1; i>=0; i--)
 	{
 		int j = rand()%(i+1);
 		swap(list[i], list[j]);
@@ -331,8 +331,8 @@ void decision_tree<T>::build_tree(node<T>* nodePtr, vector<T> sampleSet, int dep
 	nodePtr->numSample = sampleSet.size();
 	nodePtr->set_size_of_class();
 
-	if (depth >= MAXDEPTH || 
-			nodePtr->numSample >= MINSAMPLE || 
+	if (depth <= MAXDEPTH && 
+			nodePtr->numSample >= MINSAMPLE &&
 			!(nodePtr->poolPure()))
 	{
 		// select attribut
@@ -342,7 +342,7 @@ void decision_tree<T>::build_tree(node<T>* nodePtr, vector<T> sampleSet, int dep
 		vector<T> leftSample, rightSample;
 		for (auto sample: sampleSet)
 		{
-			if (sample.attr[nodePtr->attr.first] <= nodePtr->attr.second)
+			if (sample.attr.at(nodePtr->attr.first) <= nodePtr->attr.second)
 				leftSample.push_back(sample);
 			else
 				rightSample.push_back(sample);
@@ -352,8 +352,9 @@ void decision_tree<T>::build_tree(node<T>* nodePtr, vector<T> sampleSet, int dep
 		nodePtr->leftChild = new node<T>;
 		build_tree(nodePtr->leftChild, leftSample, depth+1);
 		nodePtr->rightChild = new node<T>;
-		build_tree(nodePtr->leftChild, rightSample, depth+1);
+		build_tree(nodePtr->rightChild, rightSample, depth+1);
 	}
+
 }
 
 template <class T>
@@ -376,11 +377,11 @@ template <class T>
 pair<int,float> decision_tree<T>::selectAttr(vector<T> sampleSet)
 {
 	float bestThreshold;
-	float lowestImpurity = 1;
+	float lowestImpurity = 2;
 	int attrSelected;
 
 	// attribute bagging
-	vector<int> attrList(rdmSelectSet(0,3,2));
+	vector<int> attrList(rdmSelectSet(0,3,ATTRBAGGING));
 
 	// select attribut, and threshold
 	for (auto attr_idx: attrList)
@@ -412,8 +413,16 @@ pair<int,float> decision_tree<T>::selectAttr(vector<T> sampleSet)
 
 			// calculate gini impurity of two group
 			float imp, leftImpurity, rightImpurity;
-			leftImpurity = impurity(leftSample);
-			rightImpurity = impurity(rightSample);
+			if (leftSample.size() == 0)
+				leftImpurity = 0;
+			else
+				leftImpurity = impurity(leftSample);
+
+			if (rightSample.size() == 0)
+				rightImpurity = 0;
+			else
+				rightImpurity = impurity(rightSample);
+			
 			imp = (((float)leftSample.size() * leftImpurity) +
 								 	((float)rightSample.size() * rightImpurity) ) / (float) sampleSet.size();
 
@@ -469,20 +478,16 @@ random_forest<T>::random_forest()
 template <class T>
 void random_forest<T>::build_forest(vector<T> trainSet)
 {
-	for (auto tree: treeSet)
-		tree.build_tree(treeBagging(trainSet));	
+	for (typename vector<decision_tree<T>>::iterator itr = treeSet.begin();
+		 	 itr != treeSet.end(); itr++)
+		itr->build_tree(treeBagging(trainSet));
 }
 
-// Implement tree bagging: random sample with replacement on 
-// given trainset.
 template <class T>
 vector<T> random_forest<T>::treeBagging(vector<T> trainSet)
 {
 	vector<T> newTrainSet(trainSet.size());
 	int sample;
-
-	// generate random seed
-	srand(time(NULL));
 
 	for(int i=0; i<(int)newTrainSet.size(); i++)
 	{
@@ -496,13 +501,11 @@ vector<T> random_forest<T>::treeBagging(vector<T> trainSet)
 template <class T>
 int random_forest<T>::classify(T valiInst)
 {
-	// random number seed
-	srand(time(NULL));
-
 	// vote
 	vector<int> vote(3,0);
-	for (auto tree: treeSet)
-		vote[tree.classify(valiInst)]++;
+	for (typename vector<decision_tree<T>>::iterator itr = treeSet.begin();
+			 itr != treeSet.end(); itr++)
+		vote.at(itr->classify(valiInst))++;
 
 	// reach consensus among trees
 	int majorVote=0;
@@ -541,8 +544,10 @@ void irisAnalyser::analyse(random_forest<iris> forest, vector<iris> valiSet)
 	{
 		clsfyResult = forest.classify(item);
 		if (item.cls == clsfyResult)
+		{
 			// correctly classified
 			true_pos[item.cls]++;
+		}
 		else
 		{
 			// target false negative++
@@ -551,6 +556,8 @@ void irisAnalyser::analyse(random_forest<iris> forest, vector<iris> valiSet)
 			false_pos[clsfyResult]++;
 		}
 	}
+
+	calculate_result();
 }
 
 void irisAnalyser::calculate_result()
@@ -571,6 +578,20 @@ void irisAnalyser::calculate_result()
 
 void irisAnalyser::print_result()
 {
+#define TRAINSIZE 100
+#define VALIDSIZE 50
+#define NUMTREE 8
+#define ATTRBAGGING 2
+#define MAXDEPTH 10
+#define MINSAMPLE 1
+	cout << "traning set size: " << TRAINSIZE << endl;
+	cout << "validation set size: " << VALIDSIZE << endl;
+	cout << "number of trees: " << NUMTREE << endl;
+	cout << "attribute bagging: " << ATTRBAGGING << endl;
+	cout << "decision tree max depth:  : " << MAXDEPTH << endl;
+	cout << "mininum samples of a node: " << MINSAMPLE << endl;
+	cout << endl; 
+
 	cout << "setosa\n"
 			 << "---------------------------\n"
 			 << "precision: " << precision[setosa] << " "
