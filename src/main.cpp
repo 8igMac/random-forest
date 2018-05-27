@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	irisDataSet dataSet;
-	vector<iris> irisTrainSet, irisValiSet;
+	vector<iris> irisTrainSet(TRAINSIZE), irisValiSet(VALIDSIZE);
 	random_forest<iris> irisForest;
 	irisAnalyser irsAlyzr;
 
