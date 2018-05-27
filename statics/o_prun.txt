@@ -1,0 +1,196 @@
+tran size: 570
+validation size: 3253
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.977564 recall: 0.993485
+
+1	precision: 0.927746 recall: 0.930435
+
+2	precision: 0.958466 recall: 0.9375
+
+3	precision: 0.933121 recall: 0.872024
+
+4	precision: 0.91716 recall: 0.922619
+
+5	precision: 0.988593 recall: 0.807453
+
+6	precision: 0.950311 recall: 0.990291
+
+7	precision: 0.923513 recall: 0.967359
+
+8	precision: 0.874627 recall: 0.921384
+
+9	precision: 0.781513 recall: 0.863777
+
+
+real	0m11.118s
+user	0m10.907s
+sys	0m0.134s
+
+-----------------------------------------
+tran size: 1140
+validation size: 2683
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.995968 recall: 0.988
+
+1	precision: 0.951557 recall: 0.975177
+
+2	precision: 0.992218 recall: 0.962264
+
+3	precision: 0.929368 recall: 0.93985
+
+4	precision: 0.939716 recall: 0.960145
+
+5	precision: 0.984556 recall: 0.955056
+
+6	precision: 0.980989 recall: 0.984733
+
+7	precision: 0.958477 recall: 0.97193
+
+8	precision: 0.917293 recall: 0.953125
+
+9	precision: 0.923372 recall: 0.879562
+
+
+real	0m25.572s
+user	0m25.459s
+sys	0m0.063s
+
+---------------------------------------------
+tran size: 2280
+validation size: 1543
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.971429 recall: 0.992701
+
+1	precision: 0.935897 recall: 0.979866
+
+2	precision: 0.980392 recall: 0.986842
+
+3	precision: 0.945783 recall: 0.975155
+
+4	precision: 0.97006 recall: 0.97006
+
+5	precision: 0.986395 recall: 0.960265
+
+6	precision: 0.993378 recall: 0.974026
+
+7	precision: 0.994012 recall: 0.976471
+
+8	precision: 0.940741 recall: 0.933824
+
+9	precision: 0.944099 recall: 0.915663
+
+
+real	0m58.689s
+user	0m57.342s
+sys	0m0.656s
+
+------------------------------------
+tran size: 2280
+validation size: 1543
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 8
+mininum samples of a node: 5
+
+0	precision: 0.992593 recall: 0.978102
+
+1	precision: 0.965517 recall: 0.939597
+
+2	precision: 0.98 recall: 0.967105
+
+3	precision: 0.906433 recall: 0.962733
+
+4	precision: 0.952941 recall: 0.97006
+
+5	precision: 0.979167 recall: 0.933775
+
+6	precision: 0.993378 recall: 0.974026
+
+7	precision: 1 recall: 0.964706
+
+8	precision: 0.910345 recall: 0.970588
+
+9	precision: 0.904762 recall: 0.915663
+
+
+real	0m54.147s
+user	0m53.435s
+sys	0m0.357s
+
+-----------------------------------
+tran size: 2660
+validation size: 1163
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 8
+mininum samples of a node: 5
+
+0	precision: 0.980198 recall: 1
+
+1	precision: 0.950413 recall: 0.958333
+
+2	precision: 0.992 recall: 0.992
+
+3	precision: 0.948276 recall: 0.973451
+
+4	precision: 0.954545 recall: 0.913043
+
+5	precision: 0.991071 recall: 0.948718
+
+6	precision: 0.991228 recall: 0.982609
+
+7	precision: 0.99187 recall: 0.983871
+
+8	precision: 0.942308 recall: 0.951456
+
+9	precision: 0.890511 recall: 0.924242
+
+
+real	1m2.334s
+user	1m1.911s
+sys	0m0.204s
+
+------------------------------------------
+tran size: 2660
+validation size: 1163
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.970588 recall: 1
+
+1	precision: 0.95935 recall: 0.983333
+
+2	precision: 1 recall: 0.984
+
+3	precision: 0.965217 recall: 0.982301
+
+4	precision: 0.95614 recall: 0.947826
+
+5	precision: 0.990991 recall: 0.940171
+
+6	precision: 0.991304 recall: 0.991304
+
+7	precision: 0.976 recall: 0.983871
+
+8	precision: 0.961538 recall: 0.970874
+
+9	precision: 0.946565 recall: 0.939394
+
+
+real	1m10.352s
+user	1m10.009s
+sys	0m0.162s

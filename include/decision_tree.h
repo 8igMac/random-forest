@@ -8,7 +8,6 @@
 #include <sstream>
 #include <iomanip>
 #include <utility>
-#include <unordered_map>
 #include <ctime>
 #include <cstdlib>
 #include <algorithm>
@@ -16,17 +15,14 @@
 
 using namespace std;
 
-// parameter for tuing
-#define TRAINSIZE 100
-#define VALIDSIZE 50
-#define NUMTREE 8
-#define ATTRBAGGING 2
-#define MAXDEPTH 10
-#define MINSAMPLE 1
-
-
-// Last is a dummy element
-enum irisClass { setosa, versicolor, virginica, Last };
+// parameter for tuning
+// trainpercet: n = n%*all_sample
+#define TRAINPERCENT 40
+#define NUMTREE 30
+// adjust here !!!!!
+#define ATTRBAGGING 8
+#define MAXDEPTH 12
+#define MINSAMPLE 5
 
 // randomly select 'n' number without replacement
 // on the interval [begin, end]
@@ -49,8 +45,8 @@ struct data_inst
 class dataSet
 {
 	public:	
-		// get iris data from file
-		void get_data_from_file(char* fileName, int num_attr, int num_cls);
+		// get data from file
+		void get_data_from_file(char* fileName, int num_attr, int num_cls, vector<string> formatTb);
 		void print_dataSet();
 		void split_data(vector<data_inst> &trainSet, vector<data_inst> &valiSet);
 
@@ -69,9 +65,11 @@ class node
 		int majClass();
 		bool poolPure();
 		// get quanty of each class in sample pool
-		void set_size_of_class();
+		int set_size_of_class();
 
 
+		// parent major class
+		int parentMajCls;
 		// store quanty of each class in sample pool
 		vector<int> size_of_each_class;
 		// pair<attr_index, threshold
@@ -96,11 +94,10 @@ class decision_tree
 	private:
 		int classify(node* nodePtr, data_inst valiInst);
 		void destory_tree(node* leaf);
-		void build_tree(node* nodePtr, vector<data_inst> sampleSet, int depth);
+		void build_tree(node* nodePtr, vector<data_inst> sampleSet, int depth, int parentMaj);
 		pair<int,float> selectAttr(vector<data_inst> sampleSet);
 		float impurity(vector<data_inst> sampleSet);
 
-		vector<data_inst> trainSet;
 		node* rootNodePtr;
 };
 
@@ -116,24 +113,36 @@ class random_forest
 		vector<decision_tree> treeSet;
 };
 
-class irisAnalyser
+class analyser
 {
 	public:
-		irisAnalyser();
-		void analyse(random_forest forest, vector<data_inst> valiSet);
-		void print_result();
+		analyser(vector<string> format);
+		void analyse(random_forest &forest, vector<data_inst> valiSet);
+		void print_result(int num_inst);
 	
 	private:
 		void calculate_result();
 
-		// use class of iris as key
-		// see irisClass
-		unordered_map<int, int> true_pos;
-		unordered_map<int, int> false_pos;
-		unordered_map<int, int> false_neg;
+		// use class as key
+		vector<int> true_pos;
+		vector<int> false_pos;
+		vector<int> false_neg;
 
-		unordered_map<int, float> precision;
-		unordered_map<int, float> recall;
+		vector<float> precision;
+		vector<float> recall;
+
+		vector<string> formatTb;
+};
+
+class formatHandler
+{
+	public:
+		vector<string> handle_format(char* fileName);
+		int get_num_attr();
+		int get_num_cls();
+		int get_num_inst();
+	private:
+		int num_attr, num_cls, num_inst;
 };
 
 #endif

@@ -1,0 +1,227 @@
+validation size: 1274
+tran size: 2549
+number of trees: 5
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 500
+
+0	precision: 0.545455 recall: 0.972973
+
+1	precision: 0.941176 recall: 0.125984
+
+2	precision: 0.876106 recall: 0.75
+
+3	precision: 0.717949 recall: 0.88189
+
+4	precision: 0.695312 recall: 0.664179
+
+5	precision: 0.700935 recall: 0.581395
+
+6	precision: 0.680723 recall: 0.882812
+
+7	precision: 0.626866 recall: 0.926471
+
+8	precision: 0.529851 recall: 0.645455
+
+9	precision: 0.833333 recall: 0.321429
+
+real	12m26.659s
+user	12m20.634s
+sys	0m2.167s
+
+------------------------------------------------
+validation size: 1274
+tran size: 2549
+number of trees: 5
+attribute bagging: 8
+decision tree max depth:  : 5
+mininum samples of a node: 500
+
+0	precision: 0.542714 recall: 0.972973
+
+1	precision: 0.826923 recall: 0.338583
+
+2	precision: 0.827869 recall: 0.765152
+
+3	precision: 0.672515 recall: 0.905512
+
+4	precision: 0.632353 recall: 0.641791
+
+5	precision: 0.729412 recall: 0.48062
+
+6	precision: 0.748201 recall: 0.8125
+
+7	precision: 0.672727 recall: 0.816176
+
+8	precision: 0.532847 recall: 0.663636
+
+9	precision: 0.779412 recall: 0.378571
+
+real	13m5.673s
+user	12m58.429s
+sys	0m2.687s
+
+------------------------------------------------
+tran size: 382
+validation size: 3441
+number of trees: 5
+attribute bagging: 8
+decision tree max depth:  : 5
+mininum samples of a node: 5
+
+0	precision: 0.864499 recall: 0.969605
+
+1	precision: 0.724444 recall: 0.449036
+
+2	precision: 0.893688 recall: 0.788856
+
+3	precision: 0.816901 recall: 0.655367
+
+4	precision: 0.882576 recall: 0.667622
+
+5	precision: 0.922794 recall: 0.723343
+
+6	precision: 0.910615 recall: 0.984894
+
+7	precision: 0.796703 recall: 0.830946
+
+8	precision: 0.548753 recall: 0.720238
+
+9	precision: 0.500888 recall: 0.824561
+
+
+real	0m16.852s
+user	0m16.717s
+sys	0m0.052s
+
+-----------------------------------------------
+tran size: 382
+validation size: 3441
+number of trees: 10
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.931624 recall: 0.993921
+
+1	precision: 0.853035 recall: 0.735537
+
+2	precision: 0.941748 recall: 0.853372
+
+3	precision: 0.871166 recall: 0.80226
+
+4	precision: 0.867435 recall: 0.862464
+
+5	precision: 0.972973 recall: 0.726225
+
+6	precision: 0.937322 recall: 0.993958
+
+7	precision: 0.881356 recall: 0.893983
+
+8	precision: 0.741206 recall: 0.877976
+
+9	precision: 0.662818 recall: 0.839181
+
+
+real	0m34.162s
+user	0m34.100s
+sys	0m0.010s
+
+--------------------------------------------
+tran size: 382
+validation size: 3441
+number of trees: 20
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.976048 recall: 0.990881
+
+1	precision: 0.907937 recall: 0.787879
+
+2	precision: 0.95107 recall: 0.912023
+
+3	precision: 0.894118 recall: 0.858757
+
+4	precision: 0.902579 recall: 0.902579
+
+5	precision: 0.980695 recall: 0.731988
+
+6	precision: 0.950867 recall: 0.993958
+
+7	precision: 0.900538 recall: 0.959885
+
+8	precision: 0.792208 recall: 0.907738
+
+9	precision: 0.698068 recall: 0.845029
+
+
+real	1m4.778s
+user	1m4.691s
+sys	0m0.017s
+
+------------------------------------------
+tran size: 570
+validation size: 3253
+number of trees: 20
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.971246 recall: 0.990228
+
+1	precision: 0.889535 recall: 0.886957
+
+2	precision: 0.949045 recall: 0.93125
+
+3	precision: 0.945338 recall: 0.875
+
+4	precision: 0.896552 recall: 0.928571
+
+5	precision: 0.969582 recall: 0.791925
+
+6	precision: 0.955836 recall: 0.980583
+
+7	precision: 0.92219 recall: 0.949555
+
+8	precision: 0.848665 recall: 0.899371
+
+9	precision: 0.75766 recall: 0.842105
+
+
+real	2m21.122s
+user	2m20.916s
+sys	0m0.040s
+
+-------------------------------------------
+tran size: 570
+validation size: 3253
+number of trees: 30
+attribute bagging: 8
+decision tree max depth:  : 12
+mininum samples of a node: 5
+
+0	precision: 0.974441 recall: 0.993485
+
+1	precision: 0.935103 recall: 0.918841
+
+2	precision: 0.955696 recall: 0.94375
+
+3	precision: 0.923567 recall: 0.863095
+
+4	precision: 0.911765 recall: 0.922619
+
+5	precision: 0.980916 recall: 0.798137
+
+6	precision: 0.968354 recall: 0.990291
+
+7	precision: 0.915493 recall: 0.964392
+
+8	precision: 0.863372 recall: 0.933962
+
+9	precision: 0.771186 recall: 0.845201
+
+
+real	3m31.401s
+user	3m31.129s
+sys	0m0.047s

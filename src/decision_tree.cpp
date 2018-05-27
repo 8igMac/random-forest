@@ -23,7 +23,7 @@ vector<int> rdmSelectSet(int begin, int end, int n)
 }
 
 // -----------------------
-// 	struct iris
+// 	struct data_inst
 // -----------------------
 
 data_inst::data_inst(int num_attr, int num_cls)
@@ -32,7 +32,7 @@ data_inst::data_inst(int num_attr, int num_cls)
 // -----------------------
 // 		class dataSet
 // -----------------------
-void dataSet::get_data_from_file(char* fileName, int num_attr, int num_cls)
+void dataSet::get_data_from_file(char* fileName, int num_attr, int num_cls, vector<string> formatTb)
 {
 	ifstream ifs(fileName, ifstream::in);
 	string buffer;
@@ -47,7 +47,7 @@ void dataSet::get_data_from_file(char* fileName, int num_attr, int num_cls)
 		while ((pos = buffer.find(',')) != string::npos)
 			buffer[pos] = ' ';
 
-		// use stringstream to get iris data
+		// use stringstream to get data
 		ss << buffer;
 		for (int i=0; i<num_attr; i++)
 			ss >> inst.attr[i];
@@ -57,17 +57,12 @@ void dataSet::get_data_from_file(char* fileName, int num_attr, int num_cls)
 		inst.inst_num = index;
 
 		// covert class string to enum
-		if (classBuffer.compare("Iris-setosa") == 0)
-			inst.cls = setosa;
-		else if (classBuffer.compare("Iris-versicolor") == 0)
-			inst.cls = versicolor;
-		else if (classBuffer.compare("Iris-virginica") == 0)
-			inst.cls = virginica;
-		else
-		{
-			cout << "iris class name error: " << classBuffer << endl;
-			break;
-		}
+		for (int i=0; i<(int)formatTb.size(); i++)
+			if (classBuffer.compare(formatTb.at(i)) == 0)
+			{
+				inst.cls = i;
+				break;
+			}
 
 		dataSet.push_back(inst);
 		ss.clear();
@@ -90,9 +85,10 @@ void dataSet::print_dataSet()
 void dataSet::split_data(vector<data_inst> &trainSet, vector<data_inst> &valiSet)
 {
 	vector<int> rdmPermutation(rdmSelectSet(0,dataSet.size()-1, dataSet.size()));
+	int trainSize = TRAINPERCENT * (dataSet.size()/100);
 	for (int i=0; i<(int)dataSet.size(); i++)
 	{
-		if (i<TRAINSIZE)
+		if (i<trainSize)
 			trainSet.push_back(dataSet.at(rdmPermutation[i]));
 		else
 			valiSet.push_back(dataSet.at(rdmPermutation[i]));
@@ -104,7 +100,7 @@ void dataSet::split_data(vector<data_inst> &trainSet, vector<data_inst> &valiSet
 // -----------------------
 
 node::node()
-	: leftChild(NULL), rightChild(NULL) {}
+	: parentMajCls(0), leftChild(NULL), rightChild(NULL) {}
 
 node* node::traceNextNode(data_inst valiInst)
 {
@@ -119,7 +115,7 @@ node* node::traceNextNode(data_inst valiInst)
 int node::majClass()
 {
 	if (samplePool.size() == 0)
-		return -1;
+		return parentMajCls;
 	else
 	{
 		int majCls = -1;
@@ -144,12 +140,12 @@ bool node::poolPure()
 	return false;
 }
 
-void node::set_size_of_class()
+int node::set_size_of_class()
 {
 	if (samplePool.size() == 0)
 	{
-		cout << "error: size of samplePool is 0" << endl;
-		return;
+		cout << "set size error: size of samplePool is 0" << endl;
+		return -1;
 	}
 	else
 	{
@@ -160,6 +156,7 @@ void node::set_size_of_class()
 			clsSize[item.cls]++;
 
 		size_of_each_class = clsSize;
+		return 0;
 	}
 }
 
@@ -178,15 +175,18 @@ decision_tree::~decision_tree()
 void decision_tree::build_tree(vector<data_inst> trainSet)
 {
 	rootNodePtr = new node;
-	build_tree(rootNodePtr, trainSet, 1);
+	build_tree(rootNodePtr, trainSet, 1, rootNodePtr->majClass());
 }
 
-void decision_tree::build_tree(node* nodePtr, vector<data_inst> sampleSet, int depth)
+void decision_tree::build_tree(node* nodePtr, vector<data_inst> sampleSet, int depth, int parentMaj)
 {
+//	cout << "depth: " << depth << " sample size: " << sampleSet.size() << endl; //debug
 	nodePtr->depth = depth;
 	nodePtr->samplePool = sampleSet;
 	nodePtr->numSample = sampleSet.size();
-	nodePtr->set_size_of_class();
+	nodePtr->parentMajCls = parentMaj;
+	if (nodePtr->set_size_of_class() < 0)
+		return;
 
 	if (depth <= MAXDEPTH && 
 			nodePtr->numSample >= MINSAMPLE &&
@@ -207,9 +207,9 @@ void decision_tree::build_tree(node* nodePtr, vector<data_inst> sampleSet, int d
 
 		// generate next node
 		nodePtr->leftChild = new node;
-		build_tree(nodePtr->leftChild, leftSample, depth+1);
+		build_tree(nodePtr->leftChild, leftSample, depth+1, nodePtr->majClass());
 		nodePtr->rightChild = new node;
-		build_tree(nodePtr->rightChild, rightSample, depth+1);
+		build_tree(nodePtr->rightChild, rightSample, depth+1, nodePtr->majClass());
 	}
 
 }
@@ -236,22 +236,44 @@ pair<int,float> decision_tree::selectAttr(vector<data_inst> sampleSet)
 	int attrSelected;
 
 	// attribute bagging
-	vector<int> attrList(rdmSelectSet(0,3,ATTRBAGGING));
+	int num_attr = sampleSet.at(0).attr.size();
+	vector<int> attrList(rdmSelectSet(0,num_attr-1,ATTRBAGGING));
 
+	
 	// select attribut, and threshold
 	for (auto attr_idx: attrList)
 	{
 		vector<float> valueList;
+		vector<float> prunedValuList;
 		vector<float> thresholdList;
 
-		// get threshold list
+		// get value list
 		for (auto item: sampleSet)
 			valueList.push_back(item.attr[attr_idx]);
 
+		// sort value list
 		sort(valueList.begin(), valueList.end());
 
-		for (int i=0; i < ((int)valueList.size()-1); i++)
-			thresholdList.push_back((valueList[i]+valueList[i+1])/2);
+		// prun value list
+		for (int i=0; i<(int)valueList.size(); i++)
+		{
+			if (i==0)
+				prunedValuList.push_back(valueList[i]);
+			else
+			{
+				if (valueList[i] != valueList[i-1])
+					prunedValuList.push_back(valueList[i]);
+			}
+		}
+
+		// get threshold list
+		if (prunedValuList.size() == 1)
+			thresholdList.push_back(prunedValuList[0]);
+		else
+		{
+			for (int i=0; i < ((int)prunedValuList.size()-1); i++)
+				thresholdList.push_back((prunedValuList[i]+prunedValuList[i+1])/2);
+		}
 
 		// get gest threshold
 		for (auto threshold: thresholdList)
@@ -260,7 +282,7 @@ pair<int,float> decision_tree::selectAttr(vector<data_inst> sampleSet)
 			vector<data_inst> leftSample, rightSample;
 			for (auto sample: sampleSet)
 			{
-				if (sample.attr[attr_idx] <= threshold)
+				if (sample.attr.at(attr_idx) <= threshold)
 					leftSample.push_back(sample);
 				else
 					rightSample.push_back(sample);
@@ -291,6 +313,7 @@ pair<int,float> decision_tree::selectAttr(vector<data_inst> sampleSet)
 		}
 	}
 
+	//here
 	return pair<int, float>(attrSelected, bestThreshold);
 }
 
@@ -309,13 +332,11 @@ int decision_tree::classify(node* nodePtr, data_inst valiInst)
 
 void decision_tree::destory_tree(node* leaf)
 {
-	if (leaf == NULL)
-		return;
-	else
+	if (leaf != NULL)
 	{
 		destory_tree(leaf->leftChild);
 		destory_tree(leaf->rightChild);
-		free(leaf);
+		delete leaf;
 	}
 }
 
@@ -328,9 +349,16 @@ random_forest::random_forest()
 
 void random_forest::build_forest(vector<data_inst> trainSet)
 {
+	int idx = 1;
 	for (vector<decision_tree>::iterator itr = treeSet.begin();
 		 	 itr != treeSet.end(); itr++)
+	{
+		//debug
+		cout << "building tree " << idx << "... " << endl;
 		itr->build_tree(treeBagging(trainSet));
+		cout << "finished." << endl;
+		idx++;
+	}
 }
 
 vector<data_inst> random_forest::treeBagging(vector<data_inst> trainSet)
@@ -343,14 +371,13 @@ vector<data_inst> random_forest::treeBagging(vector<data_inst> trainSet)
 		sample = rand()%(trainSet.size());
 		newTrainSet.push_back(trainSet.at(sample));
 	}
-
 	return newTrainSet;
 }
 
 int random_forest::classify(data_inst valiInst)
 {
 	// vote
-	vector<int> vote(3,0);
+	vector<int> vote(valiInst.num_cls,0);
 	for (vector<decision_tree>::iterator itr = treeSet.begin();
 			 itr != treeSet.end(); itr++)
 		vote.at(itr->classify(valiInst))++;
@@ -374,32 +401,33 @@ int random_forest::classify(data_inst valiInst)
 
 
 // -----------------------
-// 		 class irisAnalyser
+// 		 class analyser
 // -----------------------
 
 // constructor
-irisAnalyser::irisAnalyser()
-	: true_pos({{setosa, 0}, {versicolor, 0}, {virginica, 0}}),
-	  false_pos({{setosa, 0}, {versicolor, 0}, {virginica, 0}}),
-	  false_neg({{setosa, 0}, {versicolor, 0}, {virginica, 0}}),
-	  precision({{setosa, 0}, {versicolor, 0}, {virginica, 0}}),
-	  recall({{setosa, 0}, {versicolor, 0}, {virginica, 0}}) {}
+analyser::analyser(vector<string> format)
+	: true_pos(format.size(),0),
+	  false_pos(format.size(),0),
+	  false_neg(format.size(),0),
+	  precision(format.size(),0),
+	  recall(format.size(),0),
+		formatTb(format) {}
 
-void irisAnalyser::analyse(random_forest forest, vector<data_inst> valiSet)
+void analyser::analyse(random_forest &forest, vector<data_inst> valiSet)
 {
 	int clsfyResult;
-	for (auto item: valiSet)
+	for (int i=0; i<(int)valiSet.size(); i++)
 	{
-		clsfyResult = forest.classify(item);
-		if (item.cls == clsfyResult)
+		clsfyResult = forest.classify(valiSet.at(i));
+		if (valiSet.at(i).cls == clsfyResult)
 		{
 			// correctly classified
-			true_pos[item.cls]++;
+			true_pos[valiSet.at(i).cls]++;
 		}
 		else
 		{
 			// target false negative++
-			false_neg[item.cls]++;
+			false_neg[valiSet.at(i).cls]++;
 			// other false positive++
 			false_pos[clsfyResult]++;
 		}
@@ -408,9 +436,9 @@ void irisAnalyser::analyse(random_forest forest, vector<data_inst> valiSet)
 	calculate_result();
 }
 
-void irisAnalyser::calculate_result()
+void analyser::calculate_result()
 {
-	for (int cls=setosa; cls != Last; cls++)
+	for (int cls=0; cls < (int)formatTb.size(); cls++)
 	{
 		if ((true_pos[cls] + false_pos[cls]) == 0)
 			cout << "precision error: class " << cls << " dominator is 0" << endl;
@@ -424,28 +452,57 @@ void irisAnalyser::calculate_result()
 	}
 }
 
-void irisAnalyser::print_result()
+void analyser::print_result(int num_inst)
 {
-	cout << "traning set size: " << TRAINSIZE << endl;
-	cout << "validation set size: " << VALIDSIZE << endl;
+	int trainSize = TRAINPERCENT * (num_inst/100);
+	cout << "tran size: " << trainSize << endl;
+	cout << "validation size: " << num_inst-trainSize << endl;
 	cout << "number of trees: " << NUMTREE << endl;
 	cout << "attribute bagging: " << ATTRBAGGING << endl;
 	cout << "decision tree max depth:  : " << MAXDEPTH << endl;
 	cout << "mininum samples of a node: " << MINSAMPLE << endl;
 	cout << endl; 
 
-	cout << "setosa\n"
-			 << "---------------------------\n"
-			 << "precision: " << precision[setosa] << " "
-			 << "recall: " << recall[setosa] << "\n" << endl;
+	for (int i=0; i<(int)formatTb.size(); i++)
+	{
+		cout << formatTb.at(i) << "\t"
+				 << "precision: " << precision[i] << " "
+				 << "recall: " << recall[i] << "\n" << endl;
+	}
+}
 
-	cout << "versicolor\n"
-			 << "---------------------------\n"
-			 << "precision: " << precision[versicolor] << " "
-			 << "recall: " << recall[versicolor] << "\n" << endl;
+// -----------------------
+// 	class formatHandler
+// -----------------------
+vector<string> formatHandler::handle_format(char* fileName)
+{
+	ifstream ifs(fileName, ifstream::in);
+	string buffer;
+	vector<string> formatTb;
+	
+	// set number of attrubutes 
+	// and number of classes(labels)
+	ifs >> num_attr >> num_cls >> num_inst;
 
-	cout << "virginica\n"
-			 << "---------------------------\n"
-			 << "precision: " << precision[virginica] << " "
-			 << "recall: " << recall[virginica] << "\n" << endl;
+	// set format table
+	while (ifs >> buffer)
+		formatTb.push_back(buffer);
+
+	ifs.close();
+	return formatTb;
+}
+
+int formatHandler::get_num_attr()
+{
+	return num_attr;
+}
+
+int formatHandler::get_num_cls()
+{
+	return num_cls;
+}
+
+int formatHandler::get_num_inst()
+{
+	return num_inst;
 }

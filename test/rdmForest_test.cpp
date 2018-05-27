@@ -27,23 +27,14 @@ int main(int argc, char** argv)
 	// validation subset
 	data_set.split_data(TrainSet, ValiSet);
 
-	cout << "------------ training set --------------" << endl;
-	for (auto item: TrainSet)
-	{
-		cout << setw(3) << item.inst_num << " "; 
-		for (int i=0; i<fmhdlr.get_num_attr(); i++)
-			cout << setw(3) << item.attr[i] << " "; 
-		cout << setw(3) << item.cls << endl;
-	}
+	// build forest
+	Forest.build_forest(TrainSet);
 
-	cout << "------------ validation set --------------" << endl;
-	for (auto item: ValiSet)
-	{
-		cout << setw(3) << item.inst_num << " "; 
-		for (int i=0; i<fmhdlr.get_num_attr(); i++)
-			cout << setw(3) << item.attr[i] << " "; 
-		cout << setw(3) << item.cls << endl;
-	}
+	// print result
+	for (auto sample: ValiSet)
+		cout << "actual: " << sample.cls << "pridict: " << Forest.classify(sample) << endl;
+
+
 
 	return 0;
 }
