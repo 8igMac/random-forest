@@ -1,3 +1,5 @@
+// test split data into training set and validation set
+
 #include <iostream>
 #include <vector>
 
@@ -8,8 +10,7 @@ int main(int argc, char** argv)
 {
 	irisDataSet dataSet;
 	vector<iris> irisTrainSet(TRAINSIZE), irisValiSet(VALIDSIZE);
-	random_forest<iris> irisForest;
-	irisAnalyser irsAlyzr;
+	decision_tree<iris> tree;
 
 	if (argc != 2)
 		cout << "usage: ./main data-set" << endl;
@@ -21,12 +22,8 @@ int main(int argc, char** argv)
 	// validation subset
 	dataSet.split_data(irisTrainSet, irisValiSet);
 
-	// build forest
-	irisForest.build_forest(irisTrainSet);
-	
-	// validate and analyse accuracy
-	irsAlyzr.analyse(irisForest, irisValiSet);
-	irsAlyzr.print_result();
-	
+	tree.build_tree(irisTrainSet);
+
+
 	return 0;
 }
