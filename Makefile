@@ -8,7 +8,7 @@ BUILDDIR = build
 TARGETDIR = bin
 
 # file with path
-DEPS = $(shell find $(INCDIR) -type f -name *.cpp)
+DEPS = $(shell find $(INCDIR) -type f -name *.h)
 SRC = $(shell find $(SRCDIR) -type f -name *.cpp)
 OBJ = $(patsubst $(SRCDIR)/%.cpp, $(BUILDDIR)/%.o, $(SRC))
 TARGET = $(TARGETDIR)/main

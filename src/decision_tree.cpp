@@ -1,140 +1,4 @@
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#include <iomanip>
-#include <utility>
-#include <unordered_map>
-#include <ctime>
-#include <cstdlib>
-#include <algorithm>
-#include <cmath>
-
-using namespace std;
-
-// parameter for tuing
-#define TRAINSIZE 100
-#define VALIDSIZE 50
-#define NUMTREE 8
-#define ATTRBAGGING 2
-#define MAXDEPTH 10
-#define MINSAMPLE 1
-
-
-// Last is a dummy element
-enum irisClass { setosa, versicolor, virginica, Last };
-
-// randomly select 'n' number without replacement
-// on the interval [begin, end]
-vector<int> rdmSelectSet(int begin, int end, int n);
-
-struct iris
-{
-	iris();
-
-	// instance number
-	int inst_num;
-	// attributes
-	vector<float> attr;
-	// class
-	int cls;
-	// number of cls
-	int num_cls;
-};
-
-class irisDataSet
-{
-	public:	
-		// get iris data from file
-		void get_data_from_file(char* fileName);
-		void print_dataSet();
-		void split_data(vector<iris> &trainSet, vector<iris> &valiSet);
-
-	private:
-		vector<iris> dataSet;
-};
-
-
-template <class T>
-class node
-{
-	public:
-		node();
-		// return next node for given validation instance
-		node<T>* traceNextNode(T valiInst);
-		// major class of this node
-		int majClass();
-		bool poolPure();
-		// get quanty of each class in sample pool
-		void set_size_of_class();
-
-
-		// store quanty of each class in sample pool
-		vector<int> size_of_each_class;
-		// pair<attr_index, threshold
-		pair<int, float> attr;
-		// depth of the node, number of sample
-		int depth, numSample;
-		// all the samples
-		vector<T> samplePool;
-		// if <= threshold -> leftChild
-		// if >  threshold -> rightChild
-		node<T> *leftChild, *rightChild;
-};
-
-template <class T>
-class decision_tree
-{
-	public:
-		decision_tree();
-		~decision_tree();
-		void build_tree(vector<T> trainSet);
-		int classify(T valiInst);
-
-	private:
-		int classify(node<T>* nodePtr, T valiInst);
-		void destory_tree(node<T>* leaf);
-		void build_tree(node<T>* nodePtr, vector<T> sampleSet, int depth);
-		pair<int,float> selectAttr(vector<T> sampleSet);
-		float impurity(vector<T> sampleSet);
-
-		vector<T> trainSet;
-		node<T>* rootNodePtr;
-};
-
-template <class T>
-class random_forest
-{
-	public:
-		random_forest();
-		void build_forest(vector<T> trainSet);
-		int classify(T valiInst);
-
-	private:
-		vector<T> treeBagging(vector<T> trainSet);
-		vector<decision_tree<T>> treeSet;
-};
-
-class irisAnalyser
-{
-	public:
-		irisAnalyser();
-		void analyse(random_forest<iris> forest, vector<iris> valiSet);
-		void print_result();
-	
-	private:
-		void calculate_result();
-
-		// use class of iris as key
-		// see irisClass
-		unordered_map<int, int> true_pos;
-		unordered_map<int, int> false_pos;
-		unordered_map<int, int> false_neg;
-
-		unordered_map<int, float> precision;
-		unordered_map<int, float> recall;
-};
+#include "../include/decision_tree.h"
 
 // randomly select 'n' number without replacement
 // on the interval [begin, end]
@@ -162,20 +26,20 @@ vector<int> rdmSelectSet(int begin, int end, int n)
 // 	struct iris
 // -----------------------
 
-iris::iris()
-	: attr(4), num_cls(3) {}
+data_inst::data_inst(int num_attr, int num_cls)
+	: attr(num_attr), num_cls(num_cls) {}
 
 // -----------------------
-// 		class irisDataSet
+// 		class dataSet
 // -----------------------
-void irisDataSet::get_data_from_file(char* fileName)
+void dataSet::get_data_from_file(char* fileName, int num_attr, int num_cls)
 {
 	ifstream ifs(fileName, ifstream::in);
 	string buffer;
 	string classBuffer;
 	size_t pos;
 	stringstream ss;
-	iris myiris;
+	data_inst inst(num_attr, num_cls);
 
 	for (int index = 0 ; ifs >> buffer; index++)
 	{
@@ -185,32 +49,34 @@ void irisDataSet::get_data_from_file(char* fileName)
 
 		// use stringstream to get iris data
 		ss << buffer;
-		ss >> myiris.attr[0] >> myiris.attr[1] >> myiris.attr[2] >> myiris.attr[3] >> classBuffer;
+		for (int i=0; i<num_attr; i++)
+			ss >> inst.attr[i];
+		ss >> classBuffer;
 
 		// store data index
-		myiris.inst_num = index;
+		inst.inst_num = index;
 
 		// covert class string to enum
 		if (classBuffer.compare("Iris-setosa") == 0)
-			myiris.cls = setosa;
+			inst.cls = setosa;
 		else if (classBuffer.compare("Iris-versicolor") == 0)
-			myiris.cls = versicolor;
+			inst.cls = versicolor;
 		else if (classBuffer.compare("Iris-virginica") == 0)
-			myiris.cls = virginica;
+			inst.cls = virginica;
 		else
 		{
 			cout << "iris class name error: " << classBuffer << endl;
 			break;
 		}
 
-		dataSet.push_back(myiris);
+		dataSet.push_back(inst);
 		ss.clear();
 	}
 
 	ifs.close();
 }
 
-void irisDataSet::print_dataSet()
+void dataSet::print_dataSet()
 {
 	for (auto item: dataSet)
 		cout << setw(3) << item.inst_num << " " 
@@ -221,15 +87,15 @@ void irisDataSet::print_dataSet()
 				 << setw(3) << item.cls << endl;
 }
 
-void irisDataSet::split_data(vector<iris> &trainSet, vector<iris> &valiSet)
+void dataSet::split_data(vector<data_inst> &trainSet, vector<data_inst> &valiSet)
 {
 	vector<int> rdmPermutation(rdmSelectSet(0,dataSet.size()-1, dataSet.size()));
 	for (int i=0; i<(int)dataSet.size(); i++)
 	{
 		if (i<TRAINSIZE)
-			trainSet.at(i) = dataSet.at(rdmPermutation[i]);
+			trainSet.push_back(dataSet.at(rdmPermutation[i]));
 		else
-			valiSet.at(i-TRAINSIZE) = dataSet.at(rdmPermutation[i]);
+			valiSet.push_back(dataSet.at(rdmPermutation[i]));
 	}
 }
 
@@ -237,12 +103,10 @@ void irisDataSet::split_data(vector<iris> &trainSet, vector<iris> &valiSet)
 // 			class node 
 // -----------------------
 
-template <class T>
-node<T>::node()
-	: samplePool(0), leftChild(NULL), rightChild(NULL) {}
+node::node()
+	: leftChild(NULL), rightChild(NULL) {}
 
-template <class T>
-node<T>* node<T>::traceNextNode(T valiInst)
+node* node::traceNextNode(data_inst valiInst)
 {
 	// if <= threshold -> leftChild
 	// if >  threshold -> rightChild
@@ -252,8 +116,7 @@ node<T>* node<T>::traceNextNode(T valiInst)
 		return rightChild;
 }
 
-template <class T>
-int node<T>::majClass()
+int node::majClass()
 {
 	if (samplePool.size() == 0)
 		return -1;
@@ -272,8 +135,7 @@ int node<T>::majClass()
 	}
 }
 
-template <class T>
-bool node<T>::poolPure()
+bool node::poolPure()
 {
 	for (auto size: size_of_each_class)
 		if (size == (int)samplePool.size())
@@ -282,8 +144,7 @@ bool node<T>::poolPure()
 	return false;
 }
 
-template <class T>
-void node<T>::set_size_of_class()
+void node::set_size_of_class()
 {
 	if (samplePool.size() == 0)
 	{
@@ -306,25 +167,21 @@ void node<T>::set_size_of_class()
 // 	class decision_tree
 // -----------------------
 
-template <class T>
-decision_tree<T>::decision_tree()
+decision_tree::decision_tree()
 	: rootNodePtr(NULL) {}
 
-template <class T>
-decision_tree<T>::~decision_tree()
+decision_tree::~decision_tree()
 {
 	destory_tree(rootNodePtr);
 }
 
-template <class T>
-void decision_tree<T>::build_tree(vector<T> trainSet)
+void decision_tree::build_tree(vector<data_inst> trainSet)
 {
-	rootNodePtr = new node<T>;
+	rootNodePtr = new node;
 	build_tree(rootNodePtr, trainSet, 1);
 }
 
-template <class T>
-void decision_tree<T>::build_tree(node<T>* nodePtr, vector<T> sampleSet, int depth)
+void decision_tree::build_tree(node* nodePtr, vector<data_inst> sampleSet, int depth)
 {
 	nodePtr->depth = depth;
 	nodePtr->samplePool = sampleSet;
@@ -339,7 +196,7 @@ void decision_tree<T>::build_tree(node<T>* nodePtr, vector<T> sampleSet, int dep
 		nodePtr->attr = selectAttr(sampleSet);
 
 		// split sample into two group
-		vector<T> leftSample, rightSample;
+		vector<data_inst> leftSample, rightSample;
 		for (auto sample: sampleSet)
 		{
 			if (sample.attr.at(nodePtr->attr.first) <= nodePtr->attr.second)
@@ -349,16 +206,15 @@ void decision_tree<T>::build_tree(node<T>* nodePtr, vector<T> sampleSet, int dep
 		}
 
 		// generate next node
-		nodePtr->leftChild = new node<T>;
+		nodePtr->leftChild = new node;
 		build_tree(nodePtr->leftChild, leftSample, depth+1);
-		nodePtr->rightChild = new node<T>;
+		nodePtr->rightChild = new node;
 		build_tree(nodePtr->rightChild, rightSample, depth+1);
 	}
 
 }
 
-template <class T>
-float decision_tree<T>::impurity(vector<T> sampleSet)
+float decision_tree::impurity(vector<data_inst> sampleSet)
 {
 	vector<int> sizeClass(sampleSet.at(0).num_cls, 0);
 
@@ -373,8 +229,7 @@ float decision_tree<T>::impurity(vector<T> sampleSet)
 	return 1-sum_square_of_p;
 }
 
-template <class T>
-pair<int,float> decision_tree<T>::selectAttr(vector<T> sampleSet)
+pair<int,float> decision_tree::selectAttr(vector<data_inst> sampleSet)
 {
 	float bestThreshold;
 	float lowestImpurity = 2;
@@ -402,7 +257,7 @@ pair<int,float> decision_tree<T>::selectAttr(vector<T> sampleSet)
 		for (auto threshold: thresholdList)
 		{
 			// split samples into two groups
-			vector<T> leftSample, rightSample;
+			vector<data_inst> leftSample, rightSample;
 			for (auto sample: sampleSet)
 			{
 				if (sample.attr[attr_idx] <= threshold)
@@ -439,14 +294,12 @@ pair<int,float> decision_tree<T>::selectAttr(vector<T> sampleSet)
 	return pair<int, float>(attrSelected, bestThreshold);
 }
 
-template <class T>
-int decision_tree<T>::classify(T valiInst)
+int decision_tree::classify(data_inst valiInst)
 {
 	return classify(rootNodePtr, valiInst);
 }
 
-template <class T>
-int decision_tree<T>::classify(node<T>* nodePtr, T valiInst)
+int decision_tree::classify(node* nodePtr, data_inst valiInst)
 {
 	if (nodePtr->leftChild == NULL && nodePtr->rightChild == NULL)
 		return nodePtr->majClass();
@@ -454,8 +307,7 @@ int decision_tree<T>::classify(node<T>* nodePtr, T valiInst)
 		return classify(nodePtr->traceNextNode(valiInst), valiInst);
 }
 
-template <class T>
-void decision_tree<T>::destory_tree(node<T>* leaf)
+void decision_tree::destory_tree(node* leaf)
 {
 	if (leaf == NULL)
 		return;
@@ -471,39 +323,35 @@ void decision_tree<T>::destory_tree(node<T>* leaf)
 // 	class random_forest
 // -----------------------
 
-template <class T>
-random_forest<T>::random_forest()
+random_forest::random_forest()
 	: treeSet(NUMTREE) {}
 
-template <class T>
-void random_forest<T>::build_forest(vector<T> trainSet)
+void random_forest::build_forest(vector<data_inst> trainSet)
 {
-	for (typename vector<decision_tree<T>>::iterator itr = treeSet.begin();
+	for (vector<decision_tree>::iterator itr = treeSet.begin();
 		 	 itr != treeSet.end(); itr++)
 		itr->build_tree(treeBagging(trainSet));
 }
 
-template <class T>
-vector<T> random_forest<T>::treeBagging(vector<T> trainSet)
+vector<data_inst> random_forest::treeBagging(vector<data_inst> trainSet)
 {
-	vector<T> newTrainSet(trainSet.size());
+	vector<data_inst> newTrainSet;
 	int sample;
 
-	for(int i=0; i<(int)newTrainSet.size(); i++)
+	for(int i=0; i<(int)trainSet.size(); i++)
 	{
 		sample = rand()%(trainSet.size());
-		newTrainSet.at(i) = trainSet.at(sample);
+		newTrainSet.push_back(trainSet.at(sample));
 	}
 
 	return newTrainSet;
 }
 
-template <class T>
-int random_forest<T>::classify(T valiInst)
+int random_forest::classify(data_inst valiInst)
 {
 	// vote
 	vector<int> vote(3,0);
-	for (typename vector<decision_tree<T>>::iterator itr = treeSet.begin();
+	for (vector<decision_tree>::iterator itr = treeSet.begin();
 			 itr != treeSet.end(); itr++)
 		vote.at(itr->classify(valiInst))++;
 
@@ -537,7 +385,7 @@ irisAnalyser::irisAnalyser()
 	  precision({{setosa, 0}, {versicolor, 0}, {virginica, 0}}),
 	  recall({{setosa, 0}, {versicolor, 0}, {virginica, 0}}) {}
 
-void irisAnalyser::analyse(random_forest<iris> forest, vector<iris> valiSet)
+void irisAnalyser::analyse(random_forest forest, vector<data_inst> valiSet)
 {
 	int clsfyResult;
 	for (auto item: valiSet)
@@ -578,12 +426,6 @@ void irisAnalyser::calculate_result()
 
 void irisAnalyser::print_result()
 {
-#define TRAINSIZE 100
-#define VALIDSIZE 50
-#define NUMTREE 8
-#define ATTRBAGGING 2
-#define MAXDEPTH 10
-#define MINSAMPLE 1
 	cout << "traning set size: " << TRAINSIZE << endl;
 	cout << "validation set size: " << VALIDSIZE << endl;
 	cout << "number of trees: " << NUMTREE << endl;
