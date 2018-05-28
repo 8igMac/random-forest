@@ -17,8 +17,8 @@ using namespace std;
 
 // parameter for tuning
 // trainpercet: n = n%*all_sample
-#define TRAINPERCENT 40
-#define NUMTREE 30
+#define TRAINPERCENT 70
+#define NUMTREE 100
 // adjust here !!!!!
 #define ATTRBAGGING 8
 #define MAXDEPTH 12
@@ -119,18 +119,12 @@ class analyser
 		analyser(vector<string> format);
 		void analyse(random_forest &forest, vector<data_inst> valiSet);
 		void print_result(int num_inst);
+		float get_precision(int cls);
+		float get_recall(int cls);
 	
 	private:
-		void calculate_result();
-
-		// use class as key
-		vector<int> true_pos;
-		vector<int> false_pos;
-		vector<int> false_neg;
-
-		vector<float> precision;
-		vector<float> recall;
-
+		// confusion matrix
+		vector<vector<float>> confusionMtrx;
 		vector<string> formatTb;
 };
 
