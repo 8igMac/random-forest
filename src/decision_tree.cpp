@@ -354,7 +354,7 @@ void random_forest::build_forest(vector<data_inst> trainSet)
 		 	 itr != treeSet.end(); itr++)
 	{
 		//debug
-		cout << "building tree " << idx << "... " << endl;
+		cout << "building tree " << idx << "... ";
 		itr->build_tree(treeBagging(trainSet));
 		cout << "finished." << endl;
 		idx++;
@@ -406,12 +406,8 @@ int random_forest::classify(data_inst valiInst)
 
 // constructor
 analyser::analyser(vector<string> format)
-	: true_pos(format.size(),0),
-	  false_pos(format.size(),0),
-	  false_neg(format.size(),0),
-	  precision(format.size(),0),
-	  recall(format.size(),0),
-		formatTb(format) {}
+	:	confusionMtrx(format.size(), vector<float>(format.size(), 0)),
+	  formatTb(format) {}
 
 void analyser::analyse(random_forest &forest, vector<data_inst> valiSet)
 {
@@ -419,37 +415,33 @@ void analyser::analyse(random_forest &forest, vector<data_inst> valiSet)
 	for (int i=0; i<(int)valiSet.size(); i++)
 	{
 		clsfyResult = forest.classify(valiSet.at(i));
-		if (valiSet.at(i).cls == clsfyResult)
-		{
-			// correctly classified
-			true_pos[valiSet.at(i).cls]++;
-		}
-		else
-		{
-			// target false negative++
-			false_neg[valiSet.at(i).cls]++;
-			// other false positive++
-			false_pos[clsfyResult]++;
-		}
+		confusionMtrx.at(clsfyResult).at(valiSet.at(i).cls)++;
 	}
-
-	calculate_result();
 }
 
-void analyser::calculate_result()
+float analyser::get_precision(int cls)
 {
-	for (int cls=0; cls < (int)formatTb.size(); cls++)
-	{
-		if ((true_pos[cls] + false_pos[cls]) == 0)
-			cout << "precision error: class " << cls << " dominator is 0" << endl;
-		else
-			precision[cls] = (float)true_pos[cls] / (float)(true_pos[cls] + false_pos[cls]);
+	// precision = true positive / positive
+	float positive = 0;
+	float true_positive = confusionMtrx.at(cls).at(cls);
 
-		if ((true_pos[cls] + false_pos[cls]) == 0)
-			cout << "recall error: class " << cls << " dominator is 0" << endl;
-		else
-			recall[cls] = (float)true_pos[cls] / (float)(true_pos[cls] + false_neg[cls]);
-	}
+	for (int i=0; i<(int)confusionMtrx.at(cls).size(); i++)
+		positive += confusionMtrx.at(cls).at(i);
+
+	return true_positive / positive;
+}
+
+float analyser::get_recall(int cls)
+{
+	// recall = true positive / actual
+	// actual = (true_positive + false_negative)
+	float actual = 0;
+	float true_positive = confusionMtrx.at(cls).at(cls);
+
+	for (int i=0; i<(int)confusionMtrx.at(cls).size(); i++)
+		actual += confusionMtrx.at(i).at(cls);
+
+	return true_positive / actual;
 }
 
 void analyser::print_result(int num_inst)
@@ -466,8 +458,8 @@ void analyser::print_result(int num_inst)
 	for (int i=0; i<(int)formatTb.size(); i++)
 	{
 		cout << formatTb.at(i) << "\t"
-				 << "precision: " << precision[i] << " "
-				 << "recall: " << recall[i] << "\n" << endl;
+				 << "precision: " << get_precision(i) << " "
+				 << "recall: " << get_recall(i) << "\n" << endl;
 	}
 }
 
