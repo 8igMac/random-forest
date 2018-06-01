@@ -1,10 +1,8 @@
 #!/bin/bash
 
+# enter the dataset file name in ./data
 OPTICAL=optical-digits
 IRIS=iris
-
-## iput mode
-#time ./bin/main data/$1.txt data/format/$1.format
 
 ## feed data: optical-digits
 time ./bin/main data/$OPTICAL.txt data/format/$OPTICAL.format

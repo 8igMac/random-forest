@@ -18,9 +18,9 @@ using namespace std;
 // parameter for tuning
 // trainpercet: n = n%*all_sample
 #define TRAINPERCENT 70
-#define NUMTREE 100
+#define NUMTREE 30
 // adjust here !!!!!
-#define ATTRBAGGING 1
+#define ATTRBAGGING 2
 #define MAXDEPTH 12
 #define MINSAMPLE 5
 

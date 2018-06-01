@@ -11,6 +11,15 @@ To run the program
 - ./run.sh
 - make clean (To clean the project)
 
+## Playing with parameter
+To play around the parameter, you can modify the macro defined in **decision_tree.h** file in **./include**
+
+## Change dataset
+To change dataset
+- put the dataset in **./data** directory
+- add the dataformat file in **./data/format** and name it as **datasetName.format**.
+- edit **run.sh** script
+
 ## Experiments on performance 
 - Relative sizes of the training and validation subsets.
 - Number of trees in the forest.

@@ -144,7 +144,7 @@ int node::set_size_of_class()
 {
 	if (samplePool.size() == 0)
 	{
-		cout << "set size error: size of samplePool is 0" << endl;
+//		cout << "set size error: size of samplePool is 0" << endl; //debug
 		return -1;
 	}
 	else
@@ -354,7 +354,7 @@ void random_forest::build_forest(vector<data_inst> trainSet)
 		 	 itr != treeSet.end(); itr++)
 	{
 		//debug
-		cout << "building tree " << idx << "... ";
+		cout << "building tree " << idx << "... " << flush;
 		itr->build_tree(treeBagging(trainSet));
 		cout << "finished." << endl;
 		idx++;
